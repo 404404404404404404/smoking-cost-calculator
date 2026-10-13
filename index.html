@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>금연 계산기 - 담뱃값으로 만드는 미래</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: Arial, sans-serif;
+  background: #f3f6f1; color: #19382e;
+}
+header {
+  background: #123d35; color: white;
+  padding: 35px 20px; text-align: center;
+}
+header h1 { font-size: 30px; margin: 8px 0; }
+header p { color: #d7e8df; }
+main { max-width: 700px; margin: 24px auto; padding: 0 14px; }
+section {
+  background: white; border-radius: 18px;
+  padding: 22px; margin-bottom: 18px;
+  box-shadow: 0 3px 14px #123d3510;
+}
+h2 { font-size: 21px; margin-top: 0; }
+label { display: block; font-weight: bold; margin: 18px 0 8px; }
+input[type=number] {
+  width: 100%; padding: 13px; border: 1px solid #ccd8ce;
+  border-radius: 10px; font-size: 17px;
+}
+button {
+  border: 1px solid #b8cabe; border-radius: 9px;
+  background: white; color: #19382e; padding: 9px 12px;
+  cursor: pointer; font-size: 14px;
+}
+button:hover, button.active { background: #dcecdf; border-color: #38715a; }
+.buttons { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.hero-result {
+  background: #123d35; color: white;
+  border-radius: 14px; padding: 22px; margin-top: 20px;
+}
+.hero-result .label { color: #d6e8dd; font-size: 14px; }
+.big { color: #d5f477; font-size: clamp(27px, 7vw, 40px); font-weight: bold; overflow-wrap: anywhere; margin: 9px 0 20px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { background: #ffffff15; padding: 12px; border-radius: 10px; }
+.stat small { color: #d6e8dd; }
+.stat strong { display: block; margin-top: 5px; overflow-wrap: anywhere; }
+.lifetime { background: #f2f6ef; padding: 17px; border-radius: 12px; margin-top: 12px; }
+.lifetime strong { display: block; font-size: clamp(24px, 6vw, 34px); margin: 7px 0; overflow-wrap: anywhere; }
+.muted { color: #69796f; font-size: 13px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.card { border: 1px solid #e0e8df; border-radius: 13px; padding: 13px; min-width: 0; }
+.emoji { font-size: 28px; }
+.card h3 { font-size: 15px; margin: 8px 0; }
+.amount { font-weight: bold; font-size: clamp(18px, 4vw, 24px); overflow-wrap: anywhere; }
+.card p { font-size: 12px; color: #69796f; }
+.saved { background: #eaf3e5; border-radius: 13px; padding: 18px; margin-top: 15px; }
+.saved strong { display: block; font-size: clamp(25px, 6vw, 34px); margin: 8px 0; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; }
+.actions button { flex: 1; padding: 13px; }
+.primary { background: #123d35; color: white; border-color: #123d35; }
+.note { font-size: 12px; color: #69796f; line-height: 1.8; margin-top: 18px; }
+footer { text-align: center; padding: 0 18px 30px; color: #69796f; font-size: 12px; }
+@media(max-width:520px) {
+  .cards { grid-template-columns: 1fr; }
+  .card { display: grid; grid-template-columns: 40px 1fr; column-gap: 8px; }
+  .emoji { grid-row: span 3; }
+  .card h3 { margin: 0; }
+  .card p { margin: 5px 0 0; }
+}
+@media print {
+  .actions, .buttons, input[type=range] { display: none; }
+  body { background: white; }
+  section { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:34px">🌿</div>
+  <div style="color:#d5f477;font-size:13px">금연 교육 · 나의 소비 계산기</div>
+  <h1>담배에 쓴 돈,<br>다른 선택이라면?</h1>
+  <p>담뱃값을 계산하고 금연으로 만들 수 있는 미래를 확인해 보세요.</p>
+</header>
+
+<main>
+<section>
+  <h2>01. 나의 흡연 습관</h2>
+  <p class="muted">현재 흡연량과 담뱃값을 입력하세요.</p>
+
+  <label for="packs">하루 평균 흡연량 (갑)</label>
+  <input id="packs" type="number" min="0" max="100" step="0.1" value="1">
+  <div class="buttons">
+    <button type="button" data-packs="0.5">0.5갑</button>
+    <button type="button" data-packs="1">1갑</button>
+    <button type="button" data-packs="1.5">1.5갑</button>
+    <button type="button" data-packs="2">2갑</button>
+  </div>
+
+  <label for="price">담배 한 갑 가격 (원)</label>
+  <input id="price" type="number" min="0" max="1000000" step="100" value="4500">
+  <div class="buttons">
+    <button type="button" data-price="4000">4,000원</button>
+    <button type="button" data-price="4500">4,500원</button>
+    <button type="button" data-price="5000">5,000원</button>
+    <button type="button" data-price="6000">6,000원</button>
+  </div>
+
+  <label for="years">흡연 기간: <span id="yearsLabel">10</span>년</label>
+  <input id="years" type="range" min="0" max="60" value="10">
+  <input id="yearsNumber" type="number" min="0" max="100" value="10" aria-label="흡연 기간 직접 입력 (년)" style="margin-top:10px">
+</section>
+
+<section>
+  <h2>02. 나의 담뱃값</h2>
+  <div class="hero-result" aria-live="polite">
+    <div class="label">1년 동안 담배에 쓰는 돈</div>
+    <div class="big" id="annual">1,642,500원</div>
+    <div class="stats">
+      <div class="stat"><small>하루 담뱃값</small><strong id="daily">4,500원</strong></div>
+      <div class="stat"><small>한 달 담뱃값 (30일)</small><strong id="monthly">135,000원</strong></div>
+    </div>
+  </div>
+  <div class="lifetime">
+    <div class="muted">지금까지 쓴 담뱃값 추정치</div>
+    <strong id="lifetime">16,425,000원</strong>
+    <div class="muted" id="details">하루 1갑 · 한 갑 4,500원 · 10년</div>
+  </div>
+</section>
+
+<section>
+  <h2>03. 1년치 담뱃값으로 할 수 있는 일</h2>
+  <p class="muted">아래 가격을 기준으로 비교합니다.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="emoji">🍗</div>
+      <h3>치킨</h3>
+      <div class="amount" id="chicken">82마리</div>
+      <p>한 마리 20,000원</p>
+    </div>
+    <div class="card">
+      <div class="emoji">✈️</div>
+      <h3>유럽 여행</h3>
+      <div class="amount" id="travel">0.33회</div>
+      <p>1회 5,000,000원</p>
+    </div>
+    <div class="card">
+      <div class="emoji">🚘</div>
+      <h3>승용차 신차</h3>
+      <div class="amount" id="car">0.041대</div>
+      <p>1대 40,000,000원</p>
+    </div>
+  </div>
+  <div class="saved">
+    <div class="muted">금연으로 10년 동안 아낄 수 있는 담뱃값</div>
+    <strong id="saved">16,425,000원</strong>
+    <div class="muted">현재 흡연량과 가격이 유지된다고 가정합니다.</div>
+  </div>
+  <div class="actions">
+    <button class="primary" id="copy" type="button">📋 결과 복사하기</button>
+    <button id="print" type="button">🖨 결과 인쇄하기</button>
+  </div>
+  <p id="message" role="status" class="muted"></p>
+  <p class="note">
+    ※ 1년은 365일, 한 달은 30일로 계산합니다.
+    누적 지출은 과거에도 현재와 같은 흡연량과 가격이 유지되었다고 가정한 추정치입니다.
+    치킨·여행·차량은 지정 가격을 이용한 단순 비교이며 실제 비용과 다를 수 있습니다.
+  </p>
+</section>
+
+<section>
+  <h2>💚 나에게 질문하기</h2>
+  <p>금연해서 담뱃값을 아낀다면, 나는 그 돈으로 무엇을 가장 먼저 하고 싶을까요?</p>
+</section>
+</main>
+
+<footer>
+  금연 교육용 계산기 · 입력 정보는 별도 서버로 전송되지 않습니다.
+</footer>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const packs = $("packs");
+  const price = $("price");
+  const years = $("years");
+  const yearsNumber = $("yearsNumber");
+  const message = $("message");
+
+  const won = n => Math.round(n).toLocaleString("ko-KR") + "원";
+  const num = (n, digits=2) => n.toLocaleString("ko-KR", {
+    maximumFractionDigits: digits
+  });
+
+  function bounded(input, min, max) {
+    const n = Number(input.value);
+    return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : min;
+  }
+
+  function calculate() {
+    const p = bounded(packs, 0, 100);
+    const cost = bounded(price, 0, 1000000);
+    const y = bounded(yearsNumber, 0, 100);
+    const daily = p * cost;
+    const monthly = daily * 30;
+    const annual = daily * 365;
+    const lifetime = annual * y;
+
+    $("yearsLabel").textContent = y;
+    years.value = Math.min(60, y);
+    $("daily").textContent = won(daily);
+    $("monthly").textContent = won(monthly);
+    $("annual").textContent = won(annual);
+    $("lifetime").textContent = won(lifetime);
+    $("details").textContent =
+      `하루 ${num(p)}갑 · 한 갑 ${won(cost)} · ${y}년`;
+    $("chicken").textContent = num(annual / 20000, 1) + "마리";
+    $("travel").textContent = num(annual / 5000000, 2) + "회";
+    $("car").textContent = num(annual / 40000000, 3) + "대";
+    $("saved").textContent = won(annual * 10);
+
+    document.querySelectorAll("[data-packs]").forEach(b => {
+      b.classList.toggle("active", Number(b.dataset.packs) === p);
+    });
+    document.querySelectorAll("[data-price]").forEach(b => {
+      b.classList.toggle("active", Number(b.dataset.price) === cost);
+    });
+
+    return { p, cost, y, daily, monthly, annual, lifetime };
+  }
+
+  [packs, price, yearsNumber].forEach(input => {
+    input.addEventListener("input", () => {
+      message.textContent = "";
+      calculate();
+    });
+    input.addEventListener("change", () => {
+      const max = input === packs ? 100 :
+        input === price ? 1000000 : 100;
+      input.value = bounded(input, 0, max);
+      calculate();
+    });
+  });
+
+  years.addEventListener("input", () => {
+    yearsNumber.value = years.value;
+    calculate();
+  });
+
+  document.querySelectorAll("[data-packs]").forEach(b => {
+    b.addEventListener("click", () => {
+      packs.value = b.dataset.packs;
+      calculate();
+    });
+  });
+
+  document.querySelectorAll("[data-price]").forEach(b => {
+    b.addEventListener("click", () => {
+      price.value = b.dataset.price;
+      calculate();
+    });
+  });
+
+  $("copy").addEventListener("click", async () => {
+    const r = calculate();
+    const text = [
+      "나의 담뱃값 계산 결과",
+      `하루 흡연량: ${r.p}갑`,
+      `한 갑 가격: ${won(r.cost)}`,
+      `흡연 기간: ${r.y}년`,
+      `하루 담뱃값: ${won(r.daily)}`,
+      `한 달 담뱃값: ${won(r.monthly)}`,
+      `1년 담뱃값: ${won(r.annual)}`,
+      `누적 담뱃값: ${won(r.lifetime)}`,
+      `치킨: ${num(r.annual/20000,1)}마리`,
+      `유럽 여행: ${num(r.annual/5000000,2)}회`,
+      `승용차: ${num(r.annual/40000000,3)}대`,
+      `10년 절약액: ${won(r.annual*10)}`
+    ].join("\n");
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.style.position = "fixed";
+        area.style.left = "-9999px";
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand("copy");
+        area.remove();
+        if (!ok) throw new Error("copy failed");
+      }
+      message.textContent = "계산 결과를 복사했습니다.";
+    } catch (e) {
+      message.textContent = "복사할 수 없습니다. 브라우저 권한을 확인해 주세요.";
+    }
+  });
+
+  $("print").addEventListener("click", () => window.print());
+  calculate();
+})();
+</script>
+</body>
+</html>
